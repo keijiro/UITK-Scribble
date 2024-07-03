@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 
+namespace UITKScribble {
+
 [UxmlElement]
 public partial class Scribble : VisualElement
 {
@@ -65,3 +67,5 @@ public partial class Scribble : VisualElement
 
     #endregion
 }
+
+} // namespace UITKScribble

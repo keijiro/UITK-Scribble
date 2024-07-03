@@ -1,7 +1,9 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 using System.Collections.Generic;
-using Command = Scribble.Command;
+using Command = UITKScribble.Scribble.Command;
+
+namespace UITKScribble {
 
 sealed class ScribbleManipulator : PointerManipulator
 {
@@ -81,3 +83,5 @@ sealed class ScribbleManipulator : PointerManipulator
 
     #endregion
 }
+
+} // namespace UITKScribble

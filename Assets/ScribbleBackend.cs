@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 
+namespace UITKScribble {
+
 public class ScribbleBackend : MonoBehaviour
 {
     #region Public properties
@@ -82,3 +84,5 @@ public class ScribbleBackend : MonoBehaviour
 
     #endregion
 }
+
+} // namespace UITKScribble
