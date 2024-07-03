@@ -5,7 +5,7 @@ using Command = UITKScribble.Scribble.Command;
 
 namespace UITKScribble {
 
-sealed class ScribbleManipulator : PointerManipulator
+sealed class InputLogger : PointerManipulator
 {
     #region Command queue
 
@@ -23,7 +23,7 @@ sealed class ScribbleManipulator : PointerManipulator
 
     #region PointerManipulator implementation
 
-    public ScribbleManipulator(Scribble scribble)
+    public InputLogger(Scribble scribble)
     {
         _pointerID = -1;
         activators.Add(new ManipulatorActivationFilter{button = MouseButton.LeftMouse});

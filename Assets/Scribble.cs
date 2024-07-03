@@ -14,13 +14,13 @@ public partial class Scribble : VisualElement
 
     #region Visual element implementation
 
-    ScribbleManipulator _manipulator;
+    InputLogger _logger;
 
     public Scribble()
     {
         AddToClassList(ussClassName);
-        _manipulator = new ScribbleManipulator(this);
-        this.AddManipulator(_manipulator);
+        _logger = new InputLogger(this);
+        this.AddManipulator(_logger);
     }
 
     #endregion
@@ -48,11 +48,11 @@ public partial class Scribble : VisualElement
     }
 
     public bool IsLineSegmentAvailable
-      => _manipulator.Commands.Count > 1;
+      => _logger.Commands.Count > 1;
 
     public (Vector2 p1, Vector2 p2) DequeueAsLineSegment()
     {
-        var queue = _manipulator.Commands;
+        var queue = _logger.Commands;
         var p1 = queue.Dequeue()._coords;
         while (queue.Count > 1)
         {
