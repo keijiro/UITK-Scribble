@@ -1,15 +1,15 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 using System.Collections.Generic;
-using Command = UITKScribble.Scribble.Command;
 
 namespace UITKScribble {
 
 sealed class InputLogger : PointerManipulator
 {
-    #region Command queue
+    #region Input event queue
 
-    public Queue<Command> Commands { get; private set; } = new Queue<Command>();
+    public Queue<InputEvent> EventQueue { get; private set; }
+      = new Queue<InputEvent>();
 
     #endregion
 
@@ -55,7 +55,7 @@ sealed class InputLogger : PointerManipulator
         }
         else if (CanStartManipulation(e))
         {
-            Commands.Enqueue(Command.NewDown(e.localPosition));
+            EventQueue.Enqueue(InputEvent.NewDown(e.localPosition));
             target.CapturePointer(_pointerID = e.pointerId);
             e.StopPropagation();
         }
@@ -64,7 +64,7 @@ sealed class InputLogger : PointerManipulator
     void OnPointerMove(PointerMoveEvent e)
     {
         if (!IsActive || !target.HasPointerCapture(_pointerID)) return;
-        Commands.Enqueue(Command.NewMove(e.localPosition));
+        EventQueue.Enqueue(InputEvent.NewMove(e.localPosition));
         e.StopPropagation();
     }
 
@@ -74,7 +74,7 @@ sealed class InputLogger : PointerManipulator
 
         if (CanStopManipulation(e))
         {
-            Commands.Enqueue(Command.NewUp(e.localPosition));
+            EventQueue.Enqueue(InputEvent.NewUp(e.localPosition));
             _pointerID = -1;
             target.ReleaseMouse();
             e.StopPropagation();

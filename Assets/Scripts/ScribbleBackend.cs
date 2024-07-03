@@ -76,9 +76,9 @@ public class ScribbleBackend : MonoBehaviour
 
     void Update()
     {
-        if (!_ui.IsLineSegmentAvailable) return;
+        if (!_ui.HasInput) return;
 
-        var seg = _ui.DequeueAsLineSegment();
+        var seg = _ui.DequeueInput();
         Stroke(seg.p1 * 0.001f, seg.p2 * 0.001f);
     }
 
