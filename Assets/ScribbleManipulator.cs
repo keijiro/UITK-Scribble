@@ -1,8 +1,15 @@
 using UnityEngine;
 using UnityEngine.UIElements;
+using System.Collections.Generic;
 
-sealed class ScribbleManipulator : PointerManipulator
+public sealed class ScribbleManipulator : PointerManipulator
 {
+    #region
+
+    public Queue<Vector2> Points { get; private set; } = new Queue<Vector2>();
+
+    #endregion
+
     #region Private variables
 
     Scribble _scribble;
@@ -47,7 +54,7 @@ sealed class ScribbleManipulator : PointerManipulator
         }
         else if (CanStartManipulation(e))
         {
-            _start = e.localPosition;
+            Points.Enqueue(e.localPosition);
             target.CapturePointer(_pointerID = e.pointerId);
             e.StopPropagation();
         }
@@ -56,7 +63,7 @@ sealed class ScribbleManipulator : PointerManipulator
     void OnPointerMove(PointerMoveEvent e)
     {
         if (!IsActive || !target.HasPointerCapture(_pointerID)) return;
-
+        Points.Enqueue(e.localPosition);
         e.StopPropagation();
     }
 

@@ -22,7 +22,8 @@ public partial class Scribble : VisualElement
     public Scribble()
     {
         AddToClassList(ussClassName);
-        this.AddManipulator(new ScribbleManipulator(this));
+        _manipulator = new ScribbleManipulator(this);
+        this.AddManipulator(_manipulator);
         generateVisualContent += GenerateVisualContent;
     }
 
@@ -30,6 +31,7 @@ public partial class Scribble : VisualElement
 
     #region Render callback
 
+    ScribbleManipulator _manipulator;
     ScribbleBackend _backend;
 
     static readonly Vertex[] _vertices
@@ -48,10 +50,10 @@ public partial class Scribble : VisualElement
 
     void GenerateVisualContent(MeshGenerationContext context)
     {
-        Debug.Log(scribbleSettings);
-
         if (_backend == null && scribbleSettings != null)
-            _backend = ScribbleBackend.Create(scribbleSettings);
+            _backend = ScribbleBackend.Create(scribbleSettings, _manipulator);
+
+        if (_backend == null) return;
 
         var rect = contentRect;
         var (w, h, z) = (rect.width, rect.height, Vertex.nearZ);
@@ -61,7 +63,7 @@ public partial class Scribble : VisualElement
         _vertices[2].position = new Vector3(w, 0, z);
         _vertices[3].position = new Vector3(w, h, z);
 
-        var data = context.Allocate(4, 6);//, Texture2D.redTexture);
+        var data = context.Allocate(4, 6, _backend.CanvasTexture);
         data.SetAllVertices(_vertices);
         data.SetAllIndices(_indices);
     }
