@@ -8,8 +8,9 @@ public class ScribbleBackend : MonoBehaviour
     #region Public properties
 
     [field:SerializeField] public string ElementID { get; set; } = "scribble";
+    [field:SerializeField] public int Resolution { get; set; } = 1024;
     [field:SerializeField] public Color StrokeColor { get; set; } = Color.red;
-    [field:SerializeField] public float StrokeSize { get; set; } = 1;
+    [field:SerializeField] public float StrokeSize { get; set; } = 8;
 
     #endregion
 
@@ -29,15 +30,15 @@ public class ScribbleBackend : MonoBehaviour
         RenderTexture.active = prevRT;
     }
 
-    public void Stroke(Vector3 p0, Vector3 p1)
+    public void DrawLineSegment((Vector3 p0, Vector3 p1) seg)
     {
         var prevRT = RenderTexture.active;
         RenderTexture.active = _rt;
 
-        _material.SetVector("_Point0", p0);
-        _material.SetVector("_Point1", p1);
+        _material.SetVector("_Point0", seg.p0);
+        _material.SetVector("_Point1", seg.p1);
         _material.SetColor("_Color", Color.red);
-        _material.SetFloat("_Width", 0.01f);
+        _material.SetFloat("_Width", StrokeSize / Resolution);
         _material.SetPass(0);
         Graphics.DrawProceduralNow(MeshTopology.Triangles, 12, 1);
 
@@ -46,40 +47,52 @@ public class ScribbleBackend : MonoBehaviour
 
     #endregion
 
-    #region MonoBehaviour implementation
+    #region Private members
 
     Scribble _ui;
     RenderTexture _rt;
     Material _material;
+
+    void LazyInitialize()
+    {
+        var rect = _ui.contentRect;
+        var aspect = (float)rect.width / rect.height;
+        _rt = new RenderTexture(Resolution, (int)(Resolution / aspect), 0);
+        _rt.Create();
+        Clear();
+        _ui.style.backgroundImage = Background.FromRenderTexture(_rt);
+    }
+
+    #endregion
+
+    #region MonoBehaviour implementation
 
     void Start()
     {
         var root = GetComponent<UIDocument>().rootVisualElement;
         _ui = root.Q<Scribble>();
 
-        _rt = new RenderTexture(1920, 1080, 0);
-        _rt.Create();
-
         _material = new Material(_shader);
         _material.hideFlags = HideFlags.DontSave;
-
-        Clear();
-
-        _ui.style.backgroundImage = Background.FromRenderTexture(_rt);
     }
 
     void OnDestroy()
     {
         Destroy(_material);
         _material = null;
+
+        if (_rt != null)
+        {
+            Destroy(_rt);
+            _rt = null;
+        }
     }
 
     void Update()
     {
         if (!_ui.HasInput) return;
-
-        var seg = _ui.DequeueInput();
-        Stroke(seg.p1 * 0.001f, seg.p2 * 0.001f);
+        if (_rt == null) LazyInitialize();
+        DrawLineSegment(_ui.DequeueInput());
     }
 
     #endregion

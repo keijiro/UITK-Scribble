@@ -22,6 +22,16 @@ public partial class Scribble : VisualElement
 
     InputLogger _logger;
 
+    Vector2 TransformPoint(Vector2 p)
+    {
+        var r = contentRect;
+        return new Vector2((p.x - r.x) / r.width  * 2 - 1,
+                           (p.y - r.y) / r.height * 2 - 1);
+    }
+
+    (Vector2, Vector2) TransformPoints(Vector2 p1, Vector2 p2)
+      => (TransformPoint(p1), TransformPoint(p2));
+
     #endregion
 
     #region Input data accessors
@@ -36,11 +46,11 @@ public partial class Scribble : VisualElement
         while (queue.Count > 1)
         {
             var evt = queue.Dequeue();
-            if (evt.IsUp) return (p1, evt.Coords);
+            if (evt.IsUp) return TransformPoints(p1, evt.Coords);
         }
         var end = queue.Peek();
         if (end.IsUp) queue.Dequeue();
-        return (p1, end.Coords);
+        return TransformPoints(p1, end.Coords);
     }
 
     #endregion
