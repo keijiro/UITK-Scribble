@@ -1,9 +1,13 @@
 <engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <engine:VisualElement style="flex-grow: 1; flex-direction: row;">
-        <engine:VisualElement style="width: 220px; justify-content: center; background-color: rgba(106, 106, 106, 0.56); padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px;">
-            <engine:Label text="Test Zone" style="color: rgb(255, 255, 255);" />
-            <engine:VisualElement style="height: 200px; background-color: rgb(48, 48, 48); border-top-left-radius: 8px; border-top-right-radius: 8px; border-bottom-right-radius: 8px; border-bottom-left-radius: 8px;">
+    <Style src="project://database/Assets/UITK/Main.uss?fileID=7433441132597879392&amp;guid=0dba8c77d187f4d708e82c09d6c7f9ae&amp;type=3#Main" />
+    <engine:VisualElement name="screen" style="flex-grow: 1; flex-direction: row;">
+        <engine:VisualElement name="left-pane" style="width: 220px; background-color: rgb(202, 202, 202); padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px;">
+            <engine:Label text="&quot;Scribble&quot; Control Test" name="title" style="-unity-font-style: bold; font-size: 16px;" />
+            <engine:Label text="You can draw lines by left button dragging and clear the canvas with a right button click." name="description" style="white-space: normal;" />
+            <engine:VisualElement name="space" style="height: 20px;" />
+            <engine:VisualElement name="scribble-container" style="height: 200px; background-color: rgb(48, 48, 48); border-top-left-radius: 8px; border-top-right-radius: 8px; border-bottom-right-radius: 8px; border-bottom-left-radius: 8px;">
                 <UITKScribble.Scribble name="scribble-test" style="flex-grow: 1;" />
+                <engine:Label text="Draw Here!" name="draw-here-label" style="position: absolute; left: 10px; color: rgb(226, 226, 226);" />
             </engine:VisualElement>
         </engine:VisualElement>
         <engine:VisualElement style="flex-grow: 1;">
