@@ -1,20 +1,19 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 using System.Collections.Generic;
+using Command = Scribble.Command;
 
-public sealed class ScribbleManipulator : PointerManipulator
+sealed class ScribbleManipulator : PointerManipulator
 {
-    #region
+    #region Command queue
 
-    public Queue<Vector2> Points { get; private set; } = new Queue<Vector2>();
+    public Queue<Command> Commands { get; private set; } = new Queue<Command>();
 
     #endregion
 
     #region Private variables
 
-    Scribble _scribble;
     int _pointerID;
-    Vector3 _start;
 
     bool IsActive => _pointerID >= 0;
 
@@ -24,7 +23,7 @@ public sealed class ScribbleManipulator : PointerManipulator
 
     public ScribbleManipulator(Scribble scribble)
     {
-        (_scribble, _pointerID) = (scribble, -1);
+        _pointerID = -1;
         activators.Add(new ManipulatorActivationFilter{button = MouseButton.LeftMouse});
     }
 
@@ -54,7 +53,7 @@ public sealed class ScribbleManipulator : PointerManipulator
         }
         else if (CanStartManipulation(e))
         {
-            Points.Enqueue(e.localPosition);
+            Commands.Enqueue(Command.NewDown(e.localPosition));
             target.CapturePointer(_pointerID = e.pointerId);
             e.StopPropagation();
         }
@@ -63,7 +62,7 @@ public sealed class ScribbleManipulator : PointerManipulator
     void OnPointerMove(PointerMoveEvent e)
     {
         if (!IsActive || !target.HasPointerCapture(_pointerID)) return;
-        Points.Enqueue(e.localPosition);
+        Commands.Enqueue(Command.NewMove(e.localPosition));
         e.StopPropagation();
     }
 
@@ -73,6 +72,7 @@ public sealed class ScribbleManipulator : PointerManipulator
 
         if (CanStopManipulation(e))
         {
+            Commands.Enqueue(Command.NewUp(e.localPosition));
             _pointerID = -1;
             target.ReleaseMouse();
             e.StopPropagation();

@@ -4,13 +4,6 @@ using UnityEngine.UIElements;
 [UxmlElement]
 public partial class Scribble : VisualElement
 {
-    #region Public UI properties
-
-    [UxmlAttribute]
-    public ScribbleSettings scribbleSettings { get; set; } = null;
-
-    #endregion
-
     #region USS class names
 
     public static readonly string ussClassName = "scribble";
@@ -19,53 +12,55 @@ public partial class Scribble : VisualElement
 
     #region Visual element implementation
 
+    ScribbleManipulator _manipulator;
+
     public Scribble()
     {
         AddToClassList(ussClassName);
         _manipulator = new ScribbleManipulator(this);
         this.AddManipulator(_manipulator);
-        generateVisualContent += GenerateVisualContent;
     }
 
     #endregion
 
-    #region Render callback
+    #region Command queue
 
-    ScribbleManipulator _manipulator;
-    ScribbleBackend _backend;
+    public enum EventType { Down, Move, Up, Clear }
 
-    static readonly Vertex[] _vertices
-      = new Vertex[] { TempVertex(0, 0), TempVertex(0, 1),
-                       TempVertex(1, 1), TempVertex(1, 0) };
-
-    static readonly ushort[] _indices = {0, 1, 2, 2, 3, 0};
-
-    static Vertex TempVertex(float u, float v)
+    public struct Command
     {
-        var temp = new Vertex();
-        temp.tint = Color.white;
-        temp.uv = new Vector2(u, v);
-        return temp;
+        public EventType _type;
+        public Vector2 _coords;
+
+        public EventType Event => _type;
+        public Vector2 Point => _coords;
+
+        public static Command NewDown(Vector2 point)
+          => new Command { _type = EventType.Down, _coords = point };
+
+        public static Command NewMove(Vector2 point)
+          => new Command { _type = EventType.Move, _coords = point };
+
+        public static Command NewUp(Vector2 point)
+          => new Command { _type = EventType.Up, _coords = point };
     }
 
-    void GenerateVisualContent(MeshGenerationContext context)
+    public bool IsLineSegmentAvailable
+      => _manipulator.Commands.Count > 1;
+
+    public (Vector2 p1, Vector2 p2) DequeueAsLineSegment()
     {
-        if (_backend == null && scribbleSettings != null)
-            _backend = ScribbleBackend.Create(scribbleSettings, _manipulator);
-
-        if (_backend == null) return;
-
-        var rect = contentRect;
-        var (w, h, z) = (rect.width, rect.height, Vertex.nearZ);
-
-        _vertices[0].position = new Vector3(0, h, z);
-        _vertices[1].position = new Vector3(0, 0, z);
-        _vertices[2].position = new Vector3(w, 0, z);
-        _vertices[3].position = new Vector3(w, h, z);
-
-        var data = context.Allocate(4, 6, _backend.CanvasTexture);
-        data.SetAllVertices(_vertices);
-        data.SetAllIndices(_indices);
+        var queue = _manipulator.Commands;
+        var p1 = queue.Dequeue()._coords;
+        while (queue.Count > 1)
+        {
+            var cmd = queue.Dequeue();
+            if (cmd._type == EventType.Up)
+                return (p1, cmd._coords);
+        }
+        var end = queue.Peek();
+        if (end._type == EventType.Up) queue.Dequeue();
+        return (p1, end._coords);
     }
 
     #endregion
