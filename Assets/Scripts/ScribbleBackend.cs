@@ -22,7 +22,7 @@ public class ScribbleBackend : MonoBehaviour
 
     #region Public drawer methods
 
-    public void Clear()
+    public void ClearCanvas()
     {
         var prevRT = RenderTexture.active;
         RenderTexture.active = _rt;
@@ -30,13 +30,13 @@ public class ScribbleBackend : MonoBehaviour
         RenderTexture.active = prevRT;
     }
 
-    public void DrawLineSegment((Vector3 p0, Vector3 p1) seg)
+    public void DrawLineSegment(Vector3 p0, Vector3 p1)
     {
         var prevRT = RenderTexture.active;
         RenderTexture.active = _rt;
 
-        _material.SetVector("_Point0", seg.p0);
-        _material.SetVector("_Point1", seg.p1);
+        _material.SetVector("_Point0", p0);
+        _material.SetVector("_Point1", p1);
         _material.SetColor("_Color", Color.red);
         _material.SetFloat("_Width", StrokeSize / Resolution);
         _material.SetPass(0);
@@ -53,14 +53,26 @@ public class ScribbleBackend : MonoBehaviour
     RenderTexture _rt;
     Material _material;
 
-    void LazyInitialize()
+    bool LazyInitialize()
     {
         var rect = _ui.contentRect;
-        var aspect = (float)rect.width / rect.height;
-        _rt = new RenderTexture(Resolution, (int)(Resolution / aspect), 0);
+        if (float.IsNaN(rect.width) || rect.width < 8) return false;
+
+        var height = (int)(Resolution * rect.height / rect.width);
+        _rt = new RenderTexture(Resolution, height, 0);
         _rt.Create();
-        Clear();
+
+        ClearCanvas();
         _ui.style.backgroundImage = Background.FromRenderTexture(_rt);
+
+        return true;
+    }
+
+    public void DrawLineSegment((Vector3 p0, Vector3 p1)? seg)
+    {
+        if (seg == null) return;
+        var rseg = ((Vector3 p0, Vector3 p1))seg;
+        DrawLineSegment(rseg.p0, rseg.p1);
     }
 
     #endregion
@@ -90,9 +102,9 @@ public class ScribbleBackend : MonoBehaviour
 
     void Update()
     {
-        if (!_ui.HasInput) return;
-        if (_rt == null) LazyInitialize();
-        DrawLineSegment(_ui.DequeueInput());
+        if (_rt == null && !LazyInitialize()) return;
+        if (_ui.DequeueClearRequest()) ClearCanvas();
+        DrawLineSegment(_ui.DequeueStroke());
     }
 
     #endregion

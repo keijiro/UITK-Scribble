@@ -27,6 +27,7 @@ sealed class InputLogger : PointerManipulator
     {
         _pointerID = -1;
         activators.Add(new ManipulatorActivationFilter{button = MouseButton.LeftMouse});
+        activators.Add(new ManipulatorActivationFilter{button = MouseButton.RightMouse});
     }
 
     protected override void RegisterCallbacksOnTarget()
@@ -55,8 +56,15 @@ sealed class InputLogger : PointerManipulator
         }
         else if (CanStartManipulation(e))
         {
+            if (e.button == 0)
+            {
             EventQueue.Enqueue(InputEvent.NewDown(e.localPosition));
             target.CapturePointer(_pointerID = e.pointerId);
+            }
+            else
+            {
+                EventQueue.Enqueue(InputEvent.NewClear(e.localPosition));
+            }
             e.StopPropagation();
         }
     }
