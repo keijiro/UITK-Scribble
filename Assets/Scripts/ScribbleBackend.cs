@@ -37,7 +37,7 @@ public class ScribbleBackend : MonoBehaviour
 
         _material.SetVector("_Point0", p0);
         _material.SetVector("_Point1", p1);
-        _material.SetColor("_Color", Color.red);
+        _material.SetColor("_Color", StrokeColor);
         _material.SetFloat("_Width", StrokeSize / Resolution);
         _material.SetPass(0);
         Graphics.DrawProceduralNow(MeshTopology.Triangles, 12, 1);
@@ -82,7 +82,7 @@ public class ScribbleBackend : MonoBehaviour
     void Start()
     {
         var root = GetComponent<UIDocument>().rootVisualElement;
-        _ui = root.Q<Scribble>();
+        _ui = root.Q<Scribble>(ElementID);
 
         _material = new Material(_shader);
         _material.hideFlags = HideFlags.DontSave;
