@@ -39,6 +39,7 @@ public class ScribbleBackend : MonoBehaviour
         _material.SetVector("_Point1", p1);
         _material.SetColor("_Color", StrokeColor);
         _material.SetFloat("_Width", StrokeSize / Resolution);
+        _material.SetFloat("_Aspect", (float)_rt.width / _rt.height);
         _material.SetPass(0);
         Graphics.DrawProceduralNow(MeshTopology.Triangles, 12, 1);
 
