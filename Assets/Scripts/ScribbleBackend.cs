@@ -69,7 +69,7 @@ public class ScribbleBackend : MonoBehaviour
         return true;
     }
 
-    public void DrawLineSegment((Vector3 p0, Vector3 p1)? seg)
+    void DrawLineSegment((Vector3 p0, Vector3 p1)? seg)
     {
         if (seg == null) return;
         var rseg = ((Vector3 p0, Vector3 p1))seg;
